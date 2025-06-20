@@ -1,0 +1,40 @@
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+df = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
+
+#totalcharges column has " " gaps and isnull function can't perceive its.
+df["TotalCharges"]=pd.to_numeric(df["TotalCharges"], errors='coerce')
+df.dropna(inplace=True)
+
+df["Monthly_to_TotalRatio"] = df["MonthlyCharges"] / (df["TotalCharges"] + 1e-5)
+df['MultipleLines_binary'] = df['MultipleLines'].apply(lambda x: 0 if x == 'No phone service' else 1)
+df['IsPaperlessBilling'] = df['PaperlessBilling'].apply(lambda x: 1 if x == 'Yes' else 0)
+df["PaymentMethodEncoded"] = df["PaymentMethod"].astype("category").cat.codes
+
+
+#convert target variable to binary form 
+df["Churn"]=df["Churn"].map({'No':0,'Yes':1})
+
+#Label Encoding
+categorical_columns=df.select_dtypes(include='object').columns
+label_encoder={}
+for col in categorical_columns:
+    le=LabelEncoder()
+    df[col]=le.fit_transform(df[col])
+    label_encoder[col]=le #we save for later
+
+#Normalization
+X=df.drop("Churn",axis=1)
+y=df["Churn"]
+scaler = StandardScaler()
+X_scaled=scaler.fit_transform(X)
+
+#X_scaled convert to dataframe 
+X_scaled_df=pd.DataFrame(X_scaled,columns=X.columns)
+X_scaled_df["Churn"]=y.values
+print(X_scaled_df.head())
+
+#save as csv
+X_scaled_df.to_csv("data/cleaned_churn_scaled.csv", index=False)

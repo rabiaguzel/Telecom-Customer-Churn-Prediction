@@ -1,0 +1,7 @@
+flask
+scikit-learn==1.7.0
+pandas
+numpy
+streamlit
+requests
+matplotlib

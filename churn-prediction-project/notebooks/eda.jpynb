@@ -1,0 +1,35 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+df=pd.read_csv("data/cleaned_churn_scaled.csv")
+
+#examine data
+print(df.head())
+print(df.info())
+print(df.isnull().sum())
+
+#target variable distribution
+sns.countplot(data=df, x="Churn")
+plt.title("Customer Churn Distribution")
+plt.xticks([0,1],["stayed","departed"])
+plt.savefig("plots/churn_distribution.png")
+plt.show()
+
+#corr
+plt.figure(figsize=(14,10))
+sns.heatmap(df.corr(),annot=True,fmt=".2f",cmap="coolwarm")
+plt.title("Corr between Variables")
+plt.savefig("plots/correlation_heatmap.png")
+plt.show()
+
+#tenure
+plt.figure(figsize=(10,6))
+sns.kdeplot(data=df[df['Churn']==0], x='tenure', label='Stayed', shade=True)
+sns.kdeplot(data=df[df['Churn']==1], x='tenure', label='Departed', shade=True)
+plt.title('Realitionship of Tenure (Customer Time) and Churn')
+plt.xlabel('Tenure (Month)')
+plt.ylabel('Density')
+plt.legend()
+plt.savefig("plots/tenure_churn_kde.png")
+plt.show()
